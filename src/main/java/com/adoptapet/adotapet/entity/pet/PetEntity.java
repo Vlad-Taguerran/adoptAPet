@@ -1,14 +1,15 @@
-package com.adoptapet.adotapet.entity;
+package com.adoptapet.adotapet.entity.pet;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "tb_pet")
 public class PetEntity {
@@ -21,13 +22,13 @@ public class PetEntity {
     private String name;
 
     @Column
-    private int age;
-
-    @Column
     private String description;
 
     @Column
-    private String category;
+    private Category category;
+
+    @Column
+    private Status status;
 
     @Column
     private Date bornIn;

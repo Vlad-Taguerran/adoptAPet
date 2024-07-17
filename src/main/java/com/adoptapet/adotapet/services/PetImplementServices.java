@@ -1,7 +1,8 @@
 package com.adoptapet.adotapet.services;
 
+import com.adoptapet.adotapet.configure.FileStorageConfig;
 import com.adoptapet.adotapet.dto.PetDto;
-import com.adoptapet.adotapet.entity.PetEntity;
+import com.adoptapet.adotapet.entity.pet.PetEntity;
 import com.adoptapet.adotapet.ropository.PetRepository;
 import com.adoptapet.adotapet.services.interfaces.PetService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -9,27 +10,58 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
 public class PetImplementServices implements PetService {
-    private PetEntity petEntity;
+    protected PetEntity petEntity = new PetEntity();
+    private final Path storageLocation;
+
+    @Autowired
+    public PetImplementServices(FileStorageConfig storageLocation){
+        System.out.println("Initializing PetImplementServices with storage location: " + storageLocation.getUploadDir());
+        this.storageLocation = Paths.get(storageLocation.getUploadDir()).toAbsolutePath().normalize();
+        System.out.println("Initializing PetImplementServices with storage location: " + this.storageLocation);
+    }
+    @Autowired
     private PetRepository repository;
+
     @Override
-    public ResponseEntity<PetEntity> createPet(PetDto petDto) {
-        BeanUtils.copyProperties(petDto, petEntity);
-        PetEntity saved = repository.save(petEntity);
-        return ResponseEntity.ok().body(saved);
+    public ResponseEntity<PetEntity> createPet(PetDto petDto, MultipartFile petImage) {
+        String fileName = StringUtils.getFilename(Objects.requireNonNull(petImage.getOriginalFilename()));
+        try{
+            Path targetLocation = storageLocation.resolve(fileName);
+            petImage.transferTo(targetLocation);
+            String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/images/")
+                    .path(fileName)
+                    .toUriString();
+            petDto.setUrlImage(fileUrl);
+            BeanUtils.copyProperties(petDto, petEntity);
+            PetEntity saved = repository.save(petEntity);
+            return ResponseEntity.ok().body(saved);
+        }catch (Exception e){
+            System.out.println(e);
+            return null;
+        }
+
     }
 
     @Override
     public ResponseEntity<PetEntity> updatePet(UUID id, PetDto pet) {
+        System.out.println(id);
        Optional<PetEntity> petFind = repository.findById(id);
        if (petFind.isPresent()) {
-           BeanUtils.copyProperties(pet, petFind.get());
+           BeanUtils.copyProperties(pet, petFind.get(), "id");
            PetEntity saved = repository.save(petFind.get());
            return ResponseEntity.ok().body(saved);
        }
@@ -77,13 +109,14 @@ public class PetImplementServices implements PetService {
              }
              return criteriaBuilder.and(predicates_.toArray(new Predicate[0]));
          }));
-        return resultSet;
+        return ResponseEntity.ok().body(resultSet);
     }
 
 
     @Override
-    public List<PetEntity> getPets() {
-        repository.findAll();
-        return List.of();
+    public ResponseEntity<List<PetEntity>> getPets() {
+       List<PetEntity> pets = repository.findAll();
+       return ResponseEntity.ok().body(pets);
+
     }
 }

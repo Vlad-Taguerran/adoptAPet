@@ -1,6 +1,6 @@
 package com.adoptapet.adotapet.ropository;
 
-import com.adoptapet.adotapet.entity.PetEntity;
+import com.adoptapet.adotapet.entity.pet.PetEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
