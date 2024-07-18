@@ -27,10 +27,10 @@ public class PetImplementServices implements PetService {
     private final Path storageLocation;
 
     @Autowired
-    public PetImplementServices(FileStorageConfig storageLocation){
-        System.out.println("Initializing PetImplementServices with storage location: " + storageLocation.getUploadDir());
+    public PetImplementServices(FileStorageConfig storageLocation, PetRepository repository) {
         this.storageLocation = Paths.get(storageLocation.getUploadDir()).toAbsolutePath().normalize();
         System.out.println("Initializing PetImplementServices with storage location: " + this.storageLocation);
+        this.repository = repository;
     }
     @Autowired
     private PetRepository repository;
@@ -39,7 +39,9 @@ public class PetImplementServices implements PetService {
     public ResponseEntity<PetEntity> createPet(PetDto petDto, MultipartFile petImage) {
         String fileName = StringUtils.getFilename(Objects.requireNonNull(petImage.getOriginalFilename()));
         try{
+            System.out.println("Creating pet: " + storageLocation);
             Path targetLocation = storageLocation.resolve(fileName);
+            System.out.println("TESTE"+targetLocation);
             petImage.transferTo(targetLocation);
             String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/images/")
@@ -58,7 +60,6 @@ public class PetImplementServices implements PetService {
 
     @Override
     public ResponseEntity<PetEntity> updatePet(UUID id, PetDto pet) {
-        System.out.println(id);
        Optional<PetEntity> petFind = repository.findById(id);
        if (petFind.isPresent()) {
            BeanUtils.copyProperties(pet, petFind.get(), "id");
