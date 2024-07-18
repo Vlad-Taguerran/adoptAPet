@@ -14,21 +14,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.UUID;
-
+import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class PetServicesTest {
 
     @Mock
@@ -42,19 +43,42 @@ public class PetServicesTest {
 
     private Path tempDir;
 
+    PetDto petDto;
+    PetEntity petEntity;
+    UUID petId;
+
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ParseException {
         MockitoAnnotations.openMocks(this);
+         UUID.randomUUID();
 
         tempDir = Files.createTempDirectory("test-images");
         when(fileStorageConfig.getUploadDir()).thenReturn(tempDir.toString());
 
         petService = new PetImplementServices(fileStorageConfig, repository);
 
+
+        petEntity = new PetEntity();
+        petEntity.setName("Test Pet");
+        petEntity.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("20/01/1998"));
+        petEntity.setCategory(Category.Cachorro);
+        petEntity.setStatus(Status.Disponivel);
+        petEntity.setDescription("Test");
+        petEntity.setUrlImage("http://localhost/images/test.jpg");
+
+
+
+        petDto = new PetDto();
+        petDto.setName("DOG");
+        petDto.setCategory(Category.Cachorro);
+        petDto.setStatus(Status.Disponivel);
+        petDto.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("20/01/1998"));
+        petDto.setDescription("Test");
+
     }
 
     @Test
-    @DisplayName("Create a Pet")
+    @DisplayName("Shoud create a Pet")
     void testCreateAPetWithImageSaved() throws Exception {
 
         Path tempFile = tempDir.resolve("test.jpg");
@@ -66,28 +90,8 @@ public class PetServicesTest {
                 Files.readAllBytes(tempFile)
         );
 
-
-        PetEntity petEntity = new PetEntity();
-        petEntity.setName("Test Pet");
-        petEntity.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("20/01/1998"));
-        petEntity.setCategory(Category.Cachorro);
-        petEntity.setStatus(Status.Disponivel);
-        petEntity.setDescription("Test");
-        petEntity.setUrlImage("http://localhost/images/test.jpg");
         when(repository.save(any(PetEntity.class))).thenReturn(petEntity);
-
-
-        PetDto petDto = new PetDto();
-        petDto.setName("DOG");
-        petDto.setCategory(Category.Cachorro);
-        petDto.setStatus(Status.Disponivel);
-        petDto.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("20/01/1998"));
-        petDto.setDescription("Test");
-
-
         ResponseEntity<PetEntity> response = petService.createPet(petDto, file);
-
-
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Test Pet", response.getBody().getName());
@@ -100,9 +104,9 @@ public class PetServicesTest {
     @DisplayName("Update a pet")
     void  testeUpdateAPet()throws Exception{
 
-        UUID petId = UUID.randomUUID();
 
-        PetEntity existingPet = new PetEntity();
+
+        PetEntity existingPet =  petEntity;
         existingPet.setId(petId);  // Simula um pet existente com o ID gerado
         existingPet.setName("Existing Pet");
         existingPet.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("10/05/2015"));
@@ -115,7 +119,7 @@ public class PetServicesTest {
         when(repository.findById(petId)).thenReturn(java.util.Optional.of(existingPet));
 
 
-        PetDto updatedPetDto = new PetDto();
+        PetDto updatedPetDto = petDto;
         updatedPetDto.setName("Updated Pet");
         updatedPetDto.setCategory(Category.Cachorro);
         updatedPetDto.setStatus(Status.Disponivel);
@@ -144,5 +148,31 @@ public class PetServicesTest {
         verify(repository, times(1)).findById(petId);
 
         verify(repository, times(1)).save(any(PetEntity.class));
+    }
+
+    @Test
+    @DisplayName("Shoud get a pet by ID")
+    void testeGetAPetById() throws Exception{
+       PetEntity existing = petEntity;
+       existing.setId(petId);
+
+       when(repository.findById(petId)).thenReturn(Optional.of(existing));
+       ResponseEntity<PetDto> response = petService.getPetById(petId);
+       assertEquals(petId,response.getBody().getId());
+       verify(repository, times(1)).findById(petId);
+    }
+
+    @Test
+    @DisplayName("Shoud return a list whith pets")
+    void getPets() throws Exception{
+        when(repository.findAll()).thenReturn(Collections.singletonList(petEntity));
+
+       ResponseEntity<List<PetEntity>> response = petService.getPets();
+       List<PetEntity> pets = response.getBody();
+
+       assertEquals(Collections.singletonList(petEntity), pets);
+       verify(repository).findAll();
+       verifyNoMoreInteractions(repository);
+
     }
 }

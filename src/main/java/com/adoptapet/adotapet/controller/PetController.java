@@ -3,8 +3,10 @@ package com.adoptapet.adotapet.controller;
 import com.adoptapet.adotapet.dto.PetDto;
 import com.adoptapet.adotapet.entity.pet.PetEntity;
 import com.adoptapet.adotapet.services.PetImplementServices;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/pet")
+@Validated
 public class PetController {
     @Autowired
     PetImplementServices petService;
@@ -28,17 +31,18 @@ public class PetController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Set<PetEntity>> searchPet(@RequestParam String name, @RequestParam Integer age, @RequestParam String category) {
+    public ResponseEntity<Set<PetEntity>> searchPet(@RequestParam(required = false) String name, @RequestParam(required = false) String age, @RequestParam(required = false) String category) {
         return petService.searchPet(name, age, category);
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<PetEntity> createPet(@ModelAttribute PetDto petDto, @RequestParam("image")MultipartFile petImage) {
+    public ResponseEntity<PetEntity> createPet(@Valid @ModelAttribute PetDto petDto, @RequestParam(required = false,name = "image")MultipartFile petImage) {
+
         return petService.createPet(petDto, petImage);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<PetEntity> updatePet(@RequestBody PetDto petDto, @PathVariable UUID id) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PetEntity> updatePet(@Valid @RequestBody PetDto petDto, @PathVariable UUID id) {
         return petService.updatePet(id,petDto);
     }
 

@@ -24,17 +24,20 @@ public class PetEntity {
     @Column
     private String description;
 
-    @Column
+    @Enumerated(EnumType.STRING)
     private Category category;
 
-    @Column
-    private Status status;
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.Disponivel;
 
     @Column
     private Date bornIn;
 
     @Column
     private String urlImage;
+
+    @Column
+    private Boolean active = true;
 
 
 }
