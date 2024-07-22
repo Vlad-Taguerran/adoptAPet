@@ -21,6 +21,7 @@ public class SseService {
     }
 
     public void sendUpdate(List<PetDto> message) {
+
         sinks.forEach(sink -> sink.next(ServerSentEvent.builder(message).build()));
     }
 }

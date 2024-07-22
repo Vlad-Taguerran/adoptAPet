@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+
 public class Configure implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -23,6 +24,7 @@ public class Configure implements WebMvcConfigurer {
     public  void addFormatters(FormatterRegistry registry){
         registry.addConverter(new StringToLocalDateTimeCenverter());
     }
+
 
 }
 

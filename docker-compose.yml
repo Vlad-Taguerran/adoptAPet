@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  gradle:
+    image: gradle
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["sh", "-c", "gradle build && cp build/libs/*.jar /libs/"]
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 'adoptapet-back'
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080:8080"
+    volumes:
+      - ./build/libs:/libs
+      - ./src/main/resources/static/images:/app/src/main/resources/static/images
+
+
+    restart: always
+    depends_on:
+      - gradle
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/adoptapet?createDatabaseIfNoExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING.FLYWAY.URL: jdbc:mysql://db:3306/adoptapet?createDatabaseIfNoExist=true
+      SPRING.FLYWAY.USER: root
+      SPRING.FLYWAY.PASSWORD: 1234
+
+    entrypoint: [ "java", "-jar", "/libs/adotapet-0.0.1-SNAPSHOT.jar" ]
+
+
+  db:
+    image: 'mysql'
+    container_name: adoptapet-db
+    environment:
+      MYSQL_ROOT_PASSWORD: '1234'
+      MYSQL_DATABASE: 'adoptapet'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
+
+volumes:
+  mysql-data:

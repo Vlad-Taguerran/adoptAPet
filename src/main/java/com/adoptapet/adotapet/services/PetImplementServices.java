@@ -42,23 +42,14 @@ public class PetImplementServices implements PetService {
     @Override
     public ResponseEntity<PetEntity> createPet(PetDto petDto, MultipartFile petImage) {
         BeanUtils.copyProperties(petDto, petEntity);
-        if(petImage != null){
-            String fileName = StringUtils.getFilename(Objects.requireNonNull(petImage.getOriginalFilename()));
-            try {
-                Path targetLocation = storageLocation.resolve(fileName);
-                petImage.transferTo(targetLocation);
-                String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/images/")
-                        .path(fileName)
-                        .toUriString();
-                petDto.setUrlImage(fileUrl);
-                BeanUtils.copyProperties(petDto, petEntity);
-                PetEntity saved = repository.save(petEntity);
-                return ResponseEntity.ok().body(saved);
-            } catch (Exception e) {
 
-                throw new PetImageExeption("Erro ao salvar imagem");
-            }
+        if(petImage != null){
+         String fileUrl = saveImage(petImage);
+            petDto.setUrlImage(fileUrl);
+            BeanUtils.copyProperties(petDto, petEntity);
+            PetEntity saved = repository.save(petEntity);
+            sseService.sendUpdate(petsStream());
+            return ResponseEntity.ok().body(saved);
 
         }
         PetEntity saved = repository.save(petEntity);
@@ -157,5 +148,25 @@ public class PetImplementServices implements PetService {
         PetDto petDto = new PetDto();
         BeanUtils.copyProperties(petEntity, petDto);
         return petDto;
+    }
+
+    private String saveImage(MultipartFile petImage){
+        if(petImage != null){
+            String fileName = StringUtils.getFilename(Objects.requireNonNull(petImage.getOriginalFilename()));
+            try {
+                Path targetLocation = storageLocation.resolve(fileName);
+                petImage.transferTo(targetLocation);
+                String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/images/")
+                        .path(fileName)
+                        .toUriString();
+                return fileUrl;
+            } catch (Exception e) {
+
+                throw new PetImageExeption("Erro ao salvar imagem");
+            }
+
+        }
+        return null;
     }
 }

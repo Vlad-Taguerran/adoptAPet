@@ -1,0 +1,206 @@
+openapi: "3.1.0"
+info:
+  title: "adotapet API"
+  description: "adotapet API"
+  version: "1.0.0"
+servers:
+  - url: "https://adotapet"
+paths:
+  /api/pet/{id}:
+    put:
+      summary: "PUT api/pet/{id}"
+      operationId: "updatePet"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetDto"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PetEntity"
+    delete:
+      summary: "DELETE api/pet/{id}"
+      operationId: "deletePet"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+    get:
+      summary: "GET api/pet/{id}"
+      operationId: "getPet"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PetDto"
+  /api/pet:
+    post:
+      summary: "POST api/pet"
+      operationId: "createPet"
+      parameters:
+        - name: "image"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "binary"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PetEntity"
+    get:
+      summary: "GET api/pet"
+      operationId: "getPet"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PetEntity"
+  /api/pet/search:
+    get:
+      summary: "GET api/pet/search"
+      operationId: "searchPet"
+      parameters:
+        - name: "name"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+        - name: "age"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+        - name: "category"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PetEntity"
+  /api/pet/sse:
+    get:
+      summary: "GET api/pet/sse"
+      operationId: "streamEvents"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  type: "array"
+                  items:
+                    $ref: "#/components/schemas/PetDto"
+components:
+  schemas:
+    PetDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        category:
+          type: "string"
+          enum:
+            - "Cachorro"
+            - "Gato"
+            - "Passaro"
+            - "Peixe"
+            - "Reptil"
+            - "Mamifero"
+            - "Anfibio"
+            - "Invertebrado"
+        status:
+          type: "string"
+          enum:
+            - "Disponível"
+            - "Adotado"
+        bornIn:
+          type: "string"
+          format: "date-time"
+        urlImage:
+          type: "string"
+    PetEntity:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        category:
+          type: "string"
+          enum:
+            - "Cachorro"
+            - "Gato"
+            - "Passaro"
+            - "Peixe"
+            - "Reptil"
+            - "Mamifero"
+            - "Anfibio"
+            - "Invertebrado"
+        status:
+          type: "string"
+          enum:
+            - "Disponível"
+            - "Adotado"
+        bornIn:
+          type: "string"
+          format: "date-time"
+        urlImage:
+          type: "string"
+        active:
+          type: "boolean"

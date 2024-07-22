@@ -21,7 +21,7 @@ public class PetEntity {
     @Column
     private String name;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
