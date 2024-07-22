@@ -62,7 +62,7 @@ public class PetServicesTest {
         petEntity.setName("Test Pet");
         petEntity.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("20/01/1998"));
         petEntity.setCategory(Category.Cachorro);
-        petEntity.setStatus(Status.Disponivel);
+        petEntity.setStatus(Status.Disponível);
         petEntity.setDescription("Test");
         petEntity.setUrlImage("http://localhost/images/test.jpg");
 
@@ -71,7 +71,7 @@ public class PetServicesTest {
         petDto = new PetDto();
         petDto.setName("DOG");
         petDto.setCategory(Category.Cachorro);
-        petDto.setStatus(Status.Disponivel);
+        petDto.setStatus(Status.Disponível);
         petDto.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("20/01/1998"));
         petDto.setDescription("Test");
 
@@ -122,7 +122,7 @@ public class PetServicesTest {
         PetDto updatedPetDto = petDto;
         updatedPetDto.setName("Updated Pet");
         updatedPetDto.setCategory(Category.Cachorro);
-        updatedPetDto.setStatus(Status.Disponivel);
+        updatedPetDto.setStatus(Status.Disponível);
         updatedPetDto.setBornIn(new SimpleDateFormat("dd/MM/yyyy").parse("01/01/2022"));
         updatedPetDto.setDescription("Updated Description");
 

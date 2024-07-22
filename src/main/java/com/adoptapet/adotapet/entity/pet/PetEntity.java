@@ -28,7 +28,7 @@ public class PetEntity {
     private Category category;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.Disponivel;
+    private Status status = Status.Disponível;
 
     @Column
     private Date bornIn;

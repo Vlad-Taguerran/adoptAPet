@@ -9,10 +9,6 @@ import com.adoptapet.adotapet.entity.pet.PetEntity;
 import com.adoptapet.adotapet.entity.pet.Status;
 import com.adoptapet.adotapet.ropository.PetRepository;
 import com.adoptapet.adotapet.services.interfaces.PetService;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +27,8 @@ import java.util.*;
 public class PetImplementServices implements PetService {
     protected PetEntity petEntity = new PetEntity();
     private final Path storageLocation;
+    @Autowired
+    SseService sseService;
 
     @Autowired
     public PetImplementServices(FileStorageConfig storageLocation, PetRepository repository) {
@@ -44,7 +42,7 @@ public class PetImplementServices implements PetService {
     @Override
     public ResponseEntity<PetEntity> createPet(PetDto petDto, MultipartFile petImage) {
         BeanUtils.copyProperties(petDto, petEntity);
-        if(!petImage.isEmpty()){
+        if(petImage != null){
             String fileName = StringUtils.getFilename(Objects.requireNonNull(petImage.getOriginalFilename()));
             try {
                 Path targetLocation = storageLocation.resolve(fileName);
@@ -64,6 +62,7 @@ public class PetImplementServices implements PetService {
 
         }
         PetEntity saved = repository.save(petEntity);
+        sseService.sendUpdate(petsStream());
         return ResponseEntity.ok().body(saved);
 
     }
@@ -149,5 +148,14 @@ public class PetImplementServices implements PetService {
        List<PetEntity> pets = repository.findAllPets();
        return ResponseEntity.ok().body(pets);
 
+    }
+    public List<PetDto> petsStream(){
+        List<PetEntity> pets = repository.findAll();
+        return pets.stream().map(this::convertToDto).toList();
+    }
+    private PetDto convertToDto(PetEntity petEntity) {
+        PetDto petDto = new PetDto();
+        BeanUtils.copyProperties(petEntity, petDto);
+        return petDto;
     }
 }
