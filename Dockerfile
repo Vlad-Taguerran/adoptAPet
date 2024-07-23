@@ -1,7 +1,7 @@
 FROM  gradle:8.3.0-jdk17-focal AS build
 COPY . /app
 WORKDIR /app
-RUN gradle build
+RUN gradle bootRun
 
 FROM openjdk:17
 LABEL authors="vinicius santana"
