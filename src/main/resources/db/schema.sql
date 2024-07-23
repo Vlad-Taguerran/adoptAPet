@@ -1,0 +1,1 @@
+Create DATABASE IF NOT EXISTS adoptapet CHARACTER SET utf8 COLLATE utf8_general_ci;
