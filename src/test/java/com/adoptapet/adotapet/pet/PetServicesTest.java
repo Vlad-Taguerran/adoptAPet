@@ -50,7 +50,7 @@ public class PetServicesTest {
     @BeforeEach
     public void setUp() throws IOException, ParseException {
         MockitoAnnotations.openMocks(this);
-         UUID.randomUUID();
+        UUID.randomUUID();
 
         tempDir = Files.createTempDirectory("test-images");
         when(fileStorageConfig.getUploadDir()).thenReturn(tempDir.toString());
@@ -153,13 +153,13 @@ public class PetServicesTest {
     @Test
     @DisplayName("Shoud get a pet by ID")
     void testeGetAPetById() throws Exception{
-       PetEntity existing = petEntity;
-       existing.setId(petId);
+        PetEntity existing = petEntity;
+        existing.setId(petId);
 
-       when(repository.findById(petId)).thenReturn(Optional.of(existing));
-       ResponseEntity<PetDto> response = petService.getPetById(petId);
-       assertEquals(petId,response.getBody().getId());
-       verify(repository, times(1)).findById(petId);
+        when(repository.findById(petId)).thenReturn(Optional.of(existing));
+        ResponseEntity<PetDto> response = petService.getPetById(petId);
+        assertEquals(petId,response.getBody().getId());
+        verify(repository, times(1)).findById(petId);
     }
 
     @Test
@@ -167,12 +167,12 @@ public class PetServicesTest {
     void getPets() throws Exception{
         when(repository.findAll()).thenReturn(Collections.singletonList(petEntity));
 
-       ResponseEntity<List<PetEntity>> response = petService.getPets();
-       List<PetEntity> pets = response.getBody();
+        ResponseEntity<List<PetEntity>> response = petService.getPets();
+        List<PetEntity> pets = response.getBody();
 
-       assertEquals(Collections.singletonList(petEntity), pets);
-       verify(repository).findAll();
-       verifyNoMoreInteractions(repository);
+        assertEquals(Collections.singletonList(petEntity), pets);
+        verify(repository).findAll();
+        verifyNoMoreInteractions(repository);
 
     }
 }
