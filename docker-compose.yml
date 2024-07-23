@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
 
@@ -8,9 +8,9 @@ services:
       dockerfile: Dockerfile
     container_name: 'adoptapet-back'
     ports:
-      - "8080:8080"
+      - "8081:8081"
     expose:
-      - "8080:8080"
+      - "8081"
     volumes:
       - ./build/libs:/libs
       - ./src/main/resources/static/images:/app/src/main/resources/static/images
@@ -18,6 +18,9 @@ services:
 
     restart: always
     depends_on:
+      - db
+
+    networks:
       - db
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/adoptapet?createDatabaseIfNoExist=true
@@ -37,12 +40,16 @@ services:
       MYSQL_ROOT_PASSWORD: '1234'
       MYSQL_DATABASE: 'adoptapet'
     ports:
-      - '3306:3306'
+      - "4022:3306"
     expose:
-      - '3306:3306'
+      - "3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./db-init:/docker-entrypoint-initdb.d
-
+    networks:
+      - db
 volumes:
   mysql-data:
+networks:
+  db:
+    driver: bridge

@@ -134,6 +134,14 @@ public class PetImplementServices implements PetService {
 
     }
 
+    public ResponseEntity<String> adoptPet(UUID id){
+     PetEntity pet =  repository.findById(id).orElseThrow(()->new PetNotFound("Pets Não encontrado"));
+     pet.setStatus(Status.Adotado);
+     repository.save(pet);
+        sseService.sendUpdate(petsStream());
+     return  ResponseEntity.ok().build();
+    }
+
     @Override
     public ResponseEntity<List<PetEntity>> getPets() {
        List<PetEntity> pets = repository.findAllPets();

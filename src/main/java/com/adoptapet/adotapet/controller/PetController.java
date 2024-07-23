@@ -47,8 +47,13 @@ public class PetController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deletePet(@PathVariable UUID id) {
+    public ResponseEntity<String> deletePet(@PathVariable("id") UUID id) {
         return petService.deletePet(id);
     }
+
+    @PatchMapping("/{id}")
+    public  ResponseEntity<String> adoptPet(@PathVariable("id") UUID id){
+
+        return  petService.adoptPet(id);}
 
 }
